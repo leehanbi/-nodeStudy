@@ -33,10 +33,10 @@ function makeFlieList(filelist){
   return list
 };
 
-function makeInfo(tatle,filelist){
-  var list = makeFlieList(filelist);
-  var description = 'hello node.js'
+function makeInfo(tatle,filelist,description){
+  var list = makeFlieList(filelist,description);
   var templat = templatHTML(tatle,list,`<h2>${tatle}</h2>${description}`);
+  console.log(templat);
   return templat;
 }
 var app = http.createServer(function(request,response){
@@ -47,7 +47,7 @@ var app = http.createServer(function(request,response){
     if(pathname === '/'){
       if(queryData.id === undefined){
           fs.readdir('./data',function( error,filelist){
-            var templat = makeInfo('welcome',filelist);
+            var templat = makeInfo('welcome',filelist,'hello node.js');
             response.writeHead(200);
             response.end(templat);
           })
@@ -55,7 +55,7 @@ var app = http.createServer(function(request,response){
         fs.readdir('./data',function( error,filelist){
           fs.readFile(`data/${queryData.id}`,'utf8',function(err,description){
             var tatle = queryData.id;
-            var templat = makeInfo(tatle,filelist);
+            var templat = makeInfo(tatle,filelist,description);
             response.writeHead(200);
             response.end(templat);
           });
