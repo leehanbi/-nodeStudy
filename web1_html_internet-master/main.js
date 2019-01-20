@@ -73,6 +73,7 @@ var app = http.createServer(function(request,response){
         <p><input type="submit"></p>
       </form>
        `);
+       // 200은 성공했다는 의미
       response.writeHead(200);
       response.end(templat);
     })
@@ -90,16 +91,16 @@ var app = http.createServer(function(request,response){
       var post = qs.parse(body);
       var tatle = post.tatle;
       var description = post.description;
+      fs.writeFile(`data/${tatle}`,description,'utf8',
+      err => {
 
-      console.log(post);
-      console.log(post.tatle);
-      console.log(post.description);
+        // 302 요청은 페이지를 다른 곳으로 리다이렉션 시키는 것
+        response.writeHead(302,{Location:`/?id=${tatle}`});
+        response.end();
+      })
     });
-
-
-    response.writeHead(200);
-    response.end('success');
   }else{
+      // 404에러 날리기
       response.writeHead(404);
       response.end('not found');
     }
