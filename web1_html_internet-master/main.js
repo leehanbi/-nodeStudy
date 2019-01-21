@@ -3,7 +3,7 @@ var fs = require('fs');
 var url = require('url');
 var qs = require('querystring')
 
-function templatHTML(tatle,list,body){
+function templatHTML(tatle,list,body,data){
   return `
   <!doctype html>
   <html>
@@ -14,7 +14,7 @@ function templatHTML(tatle,list,body){
   <body>
   <h1><a href="/">Web</a></h1>
     ${list}
-    <a href="/create">create</a>
+    ${data}
     ${body}
     <p>
     </p>
@@ -27,7 +27,6 @@ function makeFlieList(filelist){
   var list = '<ul>';
   var i = 0
   while (i< filelist.length) {
-    console.log(i);
     list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
     i= i + 1;
   }
@@ -35,21 +34,19 @@ function makeFlieList(filelist){
   return list
 };
 
-function makeInfo(tatle,filelist,description){
+function makeInfo(tatle,filelist,description,data){
   var list = makeFlieList(filelist,description);
-  var templat = templatHTML(tatle,list,`<h2>${tatle}</h2>${description}`);
-  console.log(templat);
+  var templat = templatHTML(tatle,list,`<h2>${tatle}</h2>${description}`,data);
   return templat;
 }
 var app = http.createServer(function(request,response){
     var _url = request.url;
     var queryData = url.parse(_url,true).query;
     var pathname =  url.parse(_url,true).pathname;
-    console.log(pathname);
     if(pathname === '/'){
       if(queryData.id === undefined){
           fs.readdir('./data',function( error,filelist){
-            var templat = makeInfo('welcome',filelist,'hello node.js');
+            var templat = makeInfo('welcome',filelist,'hello node.js','<a href="/create">create</a>');
             response.writeHead(200);
             response.end(templat);
           })
@@ -57,7 +54,7 @@ var app = http.createServer(function(request,response){
         fs.readdir('./data',function( error,filelist){
           fs.readFile(`data/${queryData.id}`,'utf8',function(err,description){
             var tatle = queryData.id;
-            var templat = makeInfo(tatle,filelist,description);
+            var templat = makeInfo(tatle,filelist,description,`<a href="/create">create</a> <a href="/update?id=${tatle}">update</a>`);
             response.writeHead(200);
             response.end(templat);
           });
@@ -66,7 +63,7 @@ var app = http.createServer(function(request,response){
   } else if (pathname === '/create') {
     fs.readdir('./data',function( error,filelist){
       var templat = makeInfo('Web - create',filelist,`
-      <form action="http://localhost:3000/create_process" method="post">
+      <form action="/create_process" method="post">
         <p><input type="text" name ="tatle" placeholder="tatle"></p>
         <p><textarea name="description" rows="8" cols="80" name ="description"
         placeholder="description"> </textarea></p>
@@ -93,12 +90,28 @@ var app = http.createServer(function(request,response){
       var description = post.description;
       fs.writeFile(`data/${tatle}`,description,'utf8',
       err => {
-
         // 302 요청은 페이지를 다른 곳으로 리다이렉션 시키는 것
         response.writeHead(302,{Location:`/?id=${tatle}`});
         response.end();
       })
     });
+  }else if (pathname === '/update'){
+    fs.readdir('./data',function( error,filelist){
+      fs.readFile(`data/${queryData.id}`,'utf8',function(err,description){
+        console.log(description);
+        var tatle = queryData.id;
+        var templat = makeInfo('Web - update',filelist,`
+        <form action="/create_process" method="post">
+          <p><input type="text" name ="tatle" placeholder="tatle" value ="${tatle}"></p>
+          <p><textarea name="description" rows="8" cols="80" name ="description"
+          placeholder="description"> ${description}</textarea></p>
+          <p><input type="submit"></p>
+        </form>
+         `,`<a href="/create">create</a> <a href="/update?id=${tatle}">update</a>`);
+        response.writeHead(200);
+        response.end(templat);
+      });
+  });
   }else{
       // 404에러 날리기
       response.writeHead(404);
