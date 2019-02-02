@@ -1,43 +1,16 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
-var qs = require('querystring')
+var qs = require('querystring');
+var templat = require('./lib/templat.js');
+// 보안 관리 코드.
+var path = require('path');
 
-function templatHTML(tatle,list,body,data){
-  return `
-  <!doctype html>
-  <html>
-  <head>
-    <title>WEB1 - ${tatle}</title>
-    <meta charset="utf-8">
-  </head>
-  <body>
-  <h1><a href="/">Web</a></h1>
-    ${list}
-    ${data}
-    ${body}
-    <p>
-    </p>
-  </body>
-  </html>
-  `;
-}
-
-function makeFlieList(filelist){
-  var list = '<ul>';
-  var i = 0
-  while (i< filelist.length) {
-    list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
-    i= i + 1;
-  }
-  list = list + '</ul>';
-  return list
-};
 
 function makeInfo(tatle,filelist,description,data){
-  var list = makeFlieList(filelist,description);
-  var templat = templatHTML(tatle,list,`<h2>${tatle}</h2>${description}`,data);
-  return templat;
+  var list = templat.list(filelist,description);
+  var html= templat.html(tatle,list,`<h2>${tatle}</h2>${description}`,data);
+  return html;
 }
 var app = http.createServer(function(request,response){
     var _url = request.url;
@@ -46,15 +19,24 @@ var app = http.createServer(function(request,response){
     if(pathname === '/'){
       if(queryData.id === undefined){
           fs.readdir('./data',function( error,filelist){
-            var templat = makeInfo('welcome',filelist,'hello node.js','<a href="/create">create</a>');
+            var temp = makeInfo('welcome',filelist,'hello node.js','<a href="/create">create</a>');
             response.writeHead(200);
-            response.end(templat);
+            response.end(temp);
           })
       }else{
         fs.readdir('./data',function( error,filelist){
-          fs.readFile(`data/${queryData.id}`,'utf8',function(err,description){
+          // file내용 세탁
+          var filteredId= path.parse(queryData.id).base;
+          fs.readFile(`data/${filteredId}`,'utf8',function(err,description){
             var tatle = queryData.id;
-            var templat = makeInfo(tatle,filelist,description,`<a href="/create">create</a> <a href="/update?id=${tatle}">update</a>`);
+            var templat = makeInfo(tatle,filelist,description,`
+              <a href="/create">create</a>
+              <a href="/update?id=${tatle}">update</a>
+              <form action="/delete_process" method="post">
+                <p><input type="hidden" name ="id" value ="${tatle}"></p>
+                <p><input type="submit" value="delete¥"></p>
+              </form>
+              `);
             response.writeHead(200);
             response.end(templat);
           });
@@ -76,7 +58,6 @@ var app = http.createServer(function(request,response){
     })
   }else if(pathname === '/create_process') {
     var body = '';
-
     // requst data를 통해서 데이터가 들어와 body에 저장
     request.on('data',function(data){
         body += data;
@@ -97,11 +78,13 @@ var app = http.createServer(function(request,response){
     });
   }else if (pathname === '/update'){
     fs.readdir('./data',function( error,filelist){
-      fs.readFile(`data/${queryData.id}`,'utf8',function(err,description){
+      var filteredId= path.parse(queryData.id).base;
+      fs.readFile(`data/${filteredId}`,'utf8',function(err,description){
         console.log(description);
         var tatle = queryData.id;
         var templat = makeInfo('Web - update',filelist,`
-        <form action="/create_process" method="post">
+        <form action="/update_process" method="post">
+          <p><input type="hidden" name ="id" value ="${tatle}"></p>
           <p><input type="text" name ="tatle" placeholder="tatle" value ="${tatle}"></p>
           <p><textarea name="description" rows="8" cols="80" name ="description"
           placeholder="description"> ${description}</textarea></p>
@@ -112,6 +95,46 @@ var app = http.createServer(function(request,response){
         response.end(templat);
       });
   });
+  }else if (pathname === '/update_process'){
+    var body = '';
+    // requst data를 통해서 데이터가 들어와 body에 저장
+    request.on('data',function(data){
+        body += data;
+    });
+
+    // 그 후 end`로 넘어와 post에 담아서 뽑아 쓸수 있다
+    request.on('end',function(){
+      // post에 body데이터가 저장됨
+      var post = qs.parse(body);
+      var tatle = post.tatle;
+      var id = post.id;
+      var filteredId= path.parse(id).base;
+      var description = post.description;
+      fs.rename(`data/${filteredId}`, `data/${tatle}`, (err) => {
+          fs.writeFile(`data/${tatle}`,description,'utf8' ,(err) => {
+          response.writeHead(302,{Location:`/?id=${tatle}`});
+          response.end();
+        })
+      });
+    });
+  }else if (pathname === '/delete_process'){
+    var body = '';
+    // requst data를 통해서 데이터가 들어와 body에 저장
+    request.on('data',function(data){
+        body += data;
+    });
+    // 그 후 end`로 넘어와 post에 담아서 뽑아 쓸수 있다
+    request.on('end',function(){
+      // post에 body데이터가 저장됨
+      var post = qs.parse(body);
+      var id = post.id;
+      var filteredId= path.parse(id).base;
+      fs.unlink(`data/${filteredId}`, (err) => {
+        response.writeHead(302,{Location:`/`});
+        response.end();
+      })
+    });
+
   }else{
       // 404에러 날리기
       response.writeHead(404);
