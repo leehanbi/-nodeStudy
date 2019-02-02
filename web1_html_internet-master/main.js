@@ -6,6 +6,11 @@ var templat = require('./lib/templat.js');
 // 보안 관리 코드.
 var path = require('path');
 
+// sanitizeHtml
+var sanitizeHtml = require('sanitize-html');
+
+var dirty = 'some really tacky HTML';
+var clean = sanitizeHtml(dirty);
 
 function makeInfo(tatle,filelist,description,data){
   var list = templat.list(filelist,description);
@@ -29,11 +34,16 @@ var app = http.createServer(function(request,response){
           var filteredId= path.parse(queryData.id).base;
           fs.readFile(`data/${filteredId}`,'utf8',function(err,description){
             var tatle = queryData.id;
-            var templat = makeInfo(tatle,filelist,description,`
+            // 오염 제거
+            var sanitizeTatle = sanitizeHtml(tatle);
+            var sanitizeDescription = sanitizeHtml(description,{
+              allowedTags: ['h1','p']
+            });
+            var templat = makeInfo(sanitizeTatle,filelist,sanitizeDescription,`
               <a href="/create">create</a>
-              <a href="/update?id=${tatle}">update</a>
+              <a href="/update?id=${sanitizeTatle}">update</a>
               <form action="/delete_process" method="post">
-                <p><input type="hidden" name ="id" value ="${tatle}"></p>
+                <p><input type="hidden" name ="id" value ="${sanitizeTatle}"></p>
                 <p><input type="submit" value="delete¥"></p>
               </form>
               `);
