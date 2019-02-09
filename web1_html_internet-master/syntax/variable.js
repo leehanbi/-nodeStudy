@@ -1,11 +1,5 @@
-
-
-
-
-var name = 'Leehanbi';
-var letter = 'Dear fmklsamflkmklemkmfkmeknflknslndflnsldnflkeklfel'
-
-var letter = `Deat ${name}
-kfdmskmdfklmekfmlskdmfkemlk${name}
-please${name}`
-console.log(letter);
+var a = 1;
+console.log(a);
+a = 2;
+console.log(a);
+// 1 = 2; comment

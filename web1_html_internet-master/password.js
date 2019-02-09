@@ -1,7 +1,4 @@
-
-
-
-module.exports ={
-  id:'leehanbi',
-  password:'123123'
+module.exports = {
+  id:'egoing',
+  password:'111111'
 }

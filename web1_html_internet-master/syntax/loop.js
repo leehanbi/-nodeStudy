@@ -1,13 +1,11 @@
 console.log('A');
-console.log('A1');
-console.log('A2');
+console.log('B');
 
-console.log('A3');
-
-console.log('A4');
-
-var index = 0;
-while (index <10) {
-  console.log(index);
-  index = index +1;
+var i = 0;
+while(i < 2){
+  console.log('C1');
+  console.log('C2');
+  i = i + 1;
 }
+
+console.log('D');

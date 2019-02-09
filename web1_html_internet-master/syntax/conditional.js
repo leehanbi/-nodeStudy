@@ -1,13 +1,10 @@
-
-
 var args = process.argv;
-var result = args[2];
+console.log(args[2]);
 console.log('A');
 console.log('B');
-
-
-if(result == "1"){
+if(args[2] === '1'){
   console.log('C1');
-}else {
+} else {
   console.log('C2');
 }
+console.log('D');
