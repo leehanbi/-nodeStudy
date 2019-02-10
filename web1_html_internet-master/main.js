@@ -1,6 +1,7 @@
 var http = require('http');
 var url = require('url');
 var topic = require('./lib/topic.js');
+var author = require('./lib/author.js');
 
 var app = http.createServer(function(request,response){
     var _url = request.url;
@@ -19,9 +20,15 @@ var app = http.createServer(function(request,response){
     } else if(pathname === '/update'){
       topic.update(response, queryData);   
     } else if(pathname === '/update_process'){
-      topic.update_process(request ,response)
+      topic.update_process(request ,response);
     } else if(pathname === '/delete_process'){
-      topic.delete_process(request ,response)
+      topic.delete_process(request ,response);
+    } else if(pathname === '/author'){
+      author.author(response);
+    } else if(pathname === '/author_create'){
+      author.author_create(response);
+    } else if(pathname === '/author_create_process'){
+      author.author_create_process(request ,response);
     } else {
       response.writeHead(404);
       response.end('Not found');

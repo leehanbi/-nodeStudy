@@ -9,6 +9,7 @@ module.exports = {
     </head>
     <body>
       <h1><a href="/">WEB</a></h1>
+      <p><a href="/author">author</a></p> 
       ${list}
       ${control}
       ${body}
@@ -24,5 +25,25 @@ module.exports = {
     }
     list = list+'</ul>';
     return list;
+  },author_table:function(authors){
+    var author_table = `<table>
+    <td>글번호</td>
+    <td>이름</td>
+    <td>프로필</td>
+    `;
+    var i = 0;
+    
+    while(i< authors.length){
+        author_table += `
+        <tr>
+            <td>${authors[i].id}</td>
+            <td>${authors[i].name}</td>
+            <td>${authors[i].profile}</td>
+        </td>
+        `
+        i++;
+    };
+    author_table += '</table>';
+    return author_table;
   }
 }
