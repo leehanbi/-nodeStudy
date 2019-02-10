@@ -1,8 +1,6 @@
-var mysql = require('mysql');
 var template = require('../lib/template.js');
 var qs = require('querystring');
 var sanitize = require('sanitize-html');
-
 var db = require('./db.js');
 
 exports.main = function(response){
