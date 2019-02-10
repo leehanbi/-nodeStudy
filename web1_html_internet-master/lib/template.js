@@ -26,10 +26,15 @@ module.exports = {
     list = list+'</ul>';
     return list;
   },author_table:function(authors){
-    var author_table = `<table>
-    <td>글번호</td>
-    <td>이름</td>
-    <td>프로필</td>
+    var author_table = `
+    <table>
+      <tr>
+        <td>글번호</td>
+        <td>이름</td>
+        <td>프로필</td>
+        <td>수정</td>
+        <td>삭제</td>
+      </tr>
     `;
     var i = 0;
     
@@ -39,6 +44,8 @@ module.exports = {
             <td>${authors[i].id}</td>
             <td>${authors[i].name}</td>
             <td>${authors[i].profile}</td>
+            <td><a href="/author_update?id=${authors[i].id}">update</a></td>
+            <td><a href="/author_delete?id=${authors[i].id}">delete</a></td>
         </td>
         `
         i++;
