@@ -76,7 +76,7 @@ exports.author_create = function(response){
                 }
                 </style>
                  `,
-                 `<a href="/create">create</a>`
+                 `<a href="/">back</a>`
             );
             response.writeHead(200);
             response.end(html);
@@ -148,7 +148,7 @@ exports.author_update = function(queryData,response){
                      </style>
     
                      `,
-                     `<a href="/create">create</a>`
+                     `<a href="/">back</a>`
                 );
                 response.writeHead(200);
                 response.end(html);
@@ -177,13 +177,21 @@ exports.author_update_process = function(request,response){
         });
     });
 }
-exports.author_delete = function(queryData,response){
-    db.query('DELETE FROM author WHERE id=?',[queryData.id],(err,result)=>{
-        if(err){
-        throw err;
-        }
-        response.writeHead(302, {Location: `/author`});
-        response.end();
+exports.author_delete = function(request,response){
+    var body = '';
+    request.on('data', function(data){
+        body = body + data;
+    });
+    request.on('end', function(){
+        
+        var post = qs.parse(body);
+        db.query('DELETE FROM author WHERE id=?',[post.id],(err,result)=>{
+            if(err){
+            throw err;
+            }
+            response.writeHead(302, {Location: `/author`});
+            response.end();
+        });
     });
 
 }

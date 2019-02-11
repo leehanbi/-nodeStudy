@@ -7,6 +7,7 @@ var app = http.createServer(function(request,response){
     var _url = request.url;
     var queryData = url.parse(_url, true).query;
     var pathname = url.parse(_url, true).pathname;
+    // 메인화면
     if(pathname === '/'){
       if(queryData.id === undefined){
         topic.main(response);
@@ -45,7 +46,7 @@ var app = http.createServer(function(request,response){
       author.author_update_process(request ,response);
     // author 목록 삭제
     } else if(pathname === '/author_delete'){
-      author.author_delete(queryData, response);
+      author.author_delete(request, response);
     // 예외처리 
     } else {
       response.writeHead(404);
